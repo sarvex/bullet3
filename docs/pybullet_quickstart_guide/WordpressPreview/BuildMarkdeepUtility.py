@@ -4,14 +4,14 @@ if (__name__ == "__main__"):
   # Assemble the script which embeds the Markdeep page into the preview blog
   PreviewBlogPage = open("PreviewBlogPage.htm", "rb").read().decode("utf-8")
   HeadMatch = re.search("<head(.*?)>(.*?)</head>", PreviewBlogPage, re.DOTALL)
-  HeadAttributes = HeadMatch.group(1)
-  FullDocumentHead = HeadMatch.group(2)
+  HeadAttributes = HeadMatch[1]
+  FullDocumentHead = HeadMatch[2]
   BodyMatch = re.search("<body(.*?)>(.*?)</body>", PreviewBlogPage, re.DOTALL)
-  BodyAttributes = BodyMatch.group(1)
-  FullPreviewBody = BodyMatch.group(2)
+  BodyAttributes = BodyMatch[1]
+  FullPreviewBody = BodyMatch[2]
   ArticleHTMLCodeMacro = "$(ARTICLE_HTML_CODE)"
   iArticleHTMLCodeMacro = FullPreviewBody.find(ArticleHTMLCodeMacro)
-  DocumentBodyPrefix = FullPreviewBody[0:iArticleHTMLCodeMacro]
+  DocumentBodyPrefix = FullPreviewBody[:iArticleHTMLCodeMacro]
   DocumentBodySuffix = FullPreviewBody[iArticleHTMLCodeMacro + len(ArticleHTMLCodeMacro):]
   FullPrepareHTMLCode = open("PrepareHTML.js", "rb").read().decode("utf-8")
   ReplacementList = [("$(FULL_DOCUMENT_HEAD)", FullDocumentHead),
@@ -25,8 +25,9 @@ if (__name__ == "__main__"):
   for Element, AttributeCode in [("head", HeadAttributes), ("body", BodyAttributes)]:
     FullPrepareHTMLCode += "\r\n// Setting " + Element + " attributes\r\n"
     for Match in re.finditer("(\\w+)=\\\"(.*?)\\\"", AttributeCode):
-      FullPrepareHTMLCode += "document." + Element + ".setAttribute(\"" + Match.group(
-          1) + "\",\"" + Match.group(2) + "\");\r\n"
+      FullPrepareHTMLCode += (
+          ((f"document.{Element}" + ".setAttribute(\"" + Match.group(1)) +
+           "\",\"") + Match.group(2) + "\");\r\n")
   open("PrepareHTML.full.js", "wb").write(FullPrepareHTMLCode.encode("utf-8"))
 
   # Concatenate all the scripts together
@@ -35,10 +36,10 @@ if (__name__ == "__main__"):
       "InvokeMathJax.js"
   ]
   OutputCode = "\r\n\r\n".join([
-      "// " + SourceFile + "\r\n\r\n" + open(SourceFile, "rb").read().decode("utf-8")
+      f"// {SourceFile}" + "\r\n\r\n" +
+      open(SourceFile, "rb").read().decode("utf-8")
       for SourceFile in SourceFileList
   ])
-  OutputFile = open("MarkdeepUtility.js", "wb")
-  OutputFile.write(OutputCode.encode("utf-8"))
-  OutputFile.close()
+  with open("MarkdeepUtility.js", "wb") as OutputFile:
+    OutputFile.write(OutputCode.encode("utf-8"))
   print("Done.")

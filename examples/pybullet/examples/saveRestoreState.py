@@ -32,10 +32,10 @@ def dumpStateToFile(file):
   for i in range(p.getNumBodies()):
     pos, orn = p.getBasePositionAndOrientation(i)
     linVel, angVel = p.getBaseVelocity(i)
-    txtPos = "pos=" + str(pos) + "\n"
-    txtOrn = "orn=" + str(orn) + "\n"
-    txtLinVel = "linVel" + str(linVel) + "\n"
-    txtAngVel = "angVel" + str(angVel) + "\n"
+    txtPos = f"pos={str(pos)}" + "\n"
+    txtOrn = f"orn={str(orn)}" + "\n"
+    txtLinVel = f"linVel{str(linVel)}" + "\n"
+    txtAngVel = f"angVel{str(angVel)}" + "\n"
     file.write(txtPos)
     file.write(txtOrn)
     file.write(txtLinVel)
@@ -60,7 +60,7 @@ def compareFiles(file1, file2):
 
 
 setupWorld()
-for i in range(numSteps):
+for _ in range(numSteps):
   p.stepSimulation()
 p.saveBullet("state.bullet")
 if verbose:
@@ -72,13 +72,11 @@ if verbose:
   for q in p.getContactPoints():
     print(q)
 
-for i in range(numSteps2):
+for _ in range(numSteps2):
   p.stepSimulation()
 
-file = open("saveFile.txt", "w")
-dumpStateToFile(file)
-file.close()
-
+with open("saveFile.txt", "w") as file:
+  dumpStateToFile(file)
 #################################
 setupWorld()
 
@@ -98,13 +96,11 @@ if verbose:
   print("contact points restored=")
   for q in p.getContactPoints():
     print(q)
-for i in range(numSteps2):
+for _ in range(numSteps2):
   p.stepSimulation()
 
-file = open("restoreFile.txt", "w")
-dumpStateToFile(file)
-file.close()
-
+with open("restoreFile.txt", "w") as file:
+  dumpStateToFile(file)
 p.restoreState(stateId)
 if verbose:
   p.setInternalSimFlags(1)
@@ -114,23 +110,19 @@ if verbose:
   print("contact points restored=")
   for q in p.getContactPoints():
     print(q)
-for i in range(numSteps2):
+for _ in range(numSteps2):
   p.stepSimulation()
 
-file = open("restoreFile2.txt", "w")
-dumpStateToFile(file)
-file.close()
-
-file1 = open("saveFile.txt", "r")
-file2 = open("restoreFile.txt", "r")
-compareFiles(file1, file2)
-file1.close()
+with open("restoreFile2.txt", "w") as file:
+  dumpStateToFile(file)
+with open("saveFile.txt", "r") as file1:
+  file2 = open("restoreFile.txt", "r")
+  compareFiles(file1, file2)
 file2.close()
 
-file1 = open("saveFile.txt", "r")
-file2 = open("restoreFile2.txt", "r")
-compareFiles(file1, file2)
-file1.close()
+with open("saveFile.txt", "r") as file1:
+  file2 = open("restoreFile2.txt", "r")
+  compareFiles(file1, file2)
 file2.close()
 
 p.stopStateLogging(logId)

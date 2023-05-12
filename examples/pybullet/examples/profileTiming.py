@@ -17,7 +17,7 @@ while (time.time() < t):
   p.submitProfileTiming("pythontest")
   time.sleep(1./240.)
   p.submitProfileTiming("nested")
-  for i in range (100):
+  for _ in range (100):
     p.submitProfileTiming("deep_nested")
     p.submitProfileTiming()
   time.sleep(1./1000.)

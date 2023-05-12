@@ -114,10 +114,11 @@ batchPositions = []
 
 for x in range(32):
   for y in range(32):
-    for z in range(10):
-      batchPositions.append(
-          [x * meshScale[0] * 5.5, y * meshScale[1] * 5.5, (0.5 + z) * meshScale[2] * 2.5])
-
+    batchPositions.extend([
+        x * meshScale[0] * 5.5,
+        y * meshScale[1] * 5.5,
+        (0.5 + z) * meshScale[2] * 2.5,
+    ] for z in range(10))
 bodyUids = p.createMultiBody(baseMass=0,
                             baseInertialFramePosition=[0, 0, 0],
                             baseCollisionShapeIndex=collisionShapeId,

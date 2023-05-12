@@ -103,6 +103,8 @@ count = 0
 
 stepX = 5
 stepY = 5
+far = 1000.
+near = 0.01
 for w in range(0, imgW, stepX):
   for h in range(0, imgH, stepY):
     count += 1
@@ -114,8 +116,6 @@ for w in range(0, imgW, stepX):
     vec = rt - rf
     l = np.sqrt(np.dot(vec, vec))
     depthImg = float(depthBuffer[h, w])
-    far = 1000.
-    near = 0.01
     depth = far * near / (far - (far - near) * depthImg)
     depth /= math.cos(alpha)
     newTo = (depth / l) * vec + rf

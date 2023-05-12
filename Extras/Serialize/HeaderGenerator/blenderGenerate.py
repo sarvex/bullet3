@@ -28,7 +28,7 @@ spaces = 4
 
 
 def addSpaces(file, space):
-  for i in range(0, space):
+  for _ in range(0, space):
     file.write(" ")
 
 
@@ -38,70 +38,63 @@ def write(file, spaces, string):
 
 
 ###################################################################################
-blender = open(out + "blender.h", 'w')
-blender.write(header)
-blender.write("#ifndef __BLENDER_H__\n")
-blender.write("#define __BLENDER_H__\n")
-for dt in dtList:
-  blender.write("#include \"%s.h\"\n" % dt.filename)
+with open(f"{out}blender.h", 'w') as blender:
+  blender.write(header)
+  blender.write("#ifndef __BLENDER_H__\n")
+  blender.write("#define __BLENDER_H__\n")
+  for dt in dtList:
+    blender.write("#include \"%s.h\"\n" % dt.filename)
 
-blender.write("#endif//__BLENDER_H__")
-blender.close()
+  blender.write("#endif//__BLENDER_H__")
+with open(f"{out}blender_Common.h", 'w') as blenderC:
+  blenderC.write(header)
+  blenderC.write("#ifndef __BLENDERCOMMON_H__\n")
+  blenderC.write("#define __BLENDERCOMMON_H__\n")
 
-###################################################################################
-blenderC = open(out + "blender_Common.h", 'w')
-blenderC.write(header)
-blenderC.write("#ifndef __BLENDERCOMMON_H__\n")
-blenderC.write("#define __BLENDERCOMMON_H__\n")
-
-strUnRes = """
+  strUnRes = """
 // put an empty struct in the case
 typedef struct bInvalidHandle {
 	int unused;
 }bInvalidHandle;
 
 """
-blenderC.write(strUnRes)
+  blenderC.write(strUnRes)
 
-blenderC.write("namespace Blender {\n")
+  blenderC.write("namespace Blender {\n")
+  for dt in dtList:
+    write(blenderC, 4, "class %s;\n" % dt.name)
+
+  blenderC.write("}\n")
+  blenderC.write("#endif//__BLENDERCOMMON_H__")
 for dt in dtList:
-  write(blenderC, 4, "class %s;\n" % dt.name)
+  with open(out + dt.filename + ".h", 'w') as fp:
+    fp.write(header)
+    strUpper = dt.filename.upper()
 
-blenderC.write("}\n")
-blenderC.write("#endif//__BLENDERCOMMON_H__")
-blenderC.close()
+    fp.write("#ifndef __%s__H__\n" % strUpper)
+    fp.write("#define __%s__H__\n" % strUpper)
+    fp.write("\n\n")
 
-for dt in dtList:
-  fp = open(out + dt.filename + ".h", 'w')
+    fp.write("// -------------------------------------------------- //\n")
+    fp.write("#include \"blender_Common.h\"\n")
 
-  fp.write(header)
-  strUpper = dt.filename.upper()
+    for i in dt.includes:
+      fp.write("#include \"%s\"\n" % i)
 
-  fp.write("#ifndef __%s__H__\n" % strUpper)
-  fp.write("#define __%s__H__\n" % strUpper)
-  fp.write("\n\n")
+    fp.write("\nnamespace Blender {\n")
+    fp.write("\n\n")
 
-  fp.write("// -------------------------------------------------- //\n")
-  fp.write("#include \"blender_Common.h\"\n")
+    addSpaces(fp, 4)
+    fp.write("// ---------------------------------------------- //\n")
 
-  for i in dt.includes:
-    fp.write("#include \"%s\"\n" % i)
+    write(fp, 4, "class %s\n" % dt.name)
 
-  fp.write("\nnamespace Blender {\n")
-  fp.write("\n\n")
+    write(fp, 4, "{\n")
+    write(fp, 4, "public:\n")
+    for i in dt.dataTypes:
+      write(fp, 8, i + ";\n")
 
-  addSpaces(fp, 4)
-  fp.write("// ---------------------------------------------- //\n")
-
-  write(fp, 4, "class %s\n" % dt.name)
-
-  write(fp, 4, "{\n")
-  write(fp, 4, "public:\n")
-  for i in dt.dataTypes:
-    write(fp, 8, i + ";\n")
-
-  write(fp, 4, "};\n")
-  fp.write("}\n")
-  fp.write("\n\n")
-  fp.write("#endif//__%s__H__\n" % strUpper)
-  fp.close()
+    write(fp, 4, "};\n")
+    fp.write("}\n")
+    fp.write("\n\n")
+    fp.write("#endif//__%s__H__\n" % strUpper)

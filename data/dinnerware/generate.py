@@ -9,13 +9,13 @@ class Obj:
     self.ind_vt = 0
     self.ind_vn = 0
     self.fn = fn
-    self.out = open(fn + ".tmp", "w")
+    self.out = open(f"{fn}.tmp", "w")
     self.out.write("mtllib dinnerware.mtl\n")
 
   def __del__(self):
     self.out.close()
     import shutil
-    shutil.move(self.fn + ".tmp", self.fn)
+    shutil.move(f"{self.fn}.tmp", self.fn)
 
   def push_v(self, v):
     self.out.write("v %f %f %f\n" % (v[0], v[1], v[2]))
@@ -161,9 +161,8 @@ def generate_plate(p, obj, collision_prefix):
     angle = step / float(p.N_VIZ) * 2 * np.pi
 
     if step % p.COLLISION_EVERY == 0:
-      vlist_3d = []
-      for x, y in p.belt_simple:
-        vlist_3d.append([np.cos(angle) * x * 1.06, np.sin(angle) * x * 1.06, y])
+      vlist_3d = [[np.cos(angle) * x * 1.06,
+                   np.sin(angle) * x * 1.06, y] for x, y in p.belt_simple]
       if belt_vlist_3d_prev:
         obj2 = Obj(collision_prefix % (step / p.COLLISION_EVERY))
         obj2.out.write("usemtl pan_tefal\n")

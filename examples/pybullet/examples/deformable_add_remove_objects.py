@@ -20,16 +20,16 @@ p.setPhysicsEngineParameter(sparseSdfVoxelSize=0.25)
 cloth1 = _load_softbody([0,0,1])
 cloth2 = _load_softbody([0,1,0])
 
-for i in range(300):
+for _ in range(300):
     p.stepSimulation()
- 
+
 # remove one object, add two and then step
 p.removeBody(cloth2)
 _load_softbody([0,1,1])
 _load_softbody([0,-1,1])
 
-for i in range(300):
-   p.stepSimulation()
+for _ in range(300):
+    p.stepSimulation()
 
 # reset simulation, add objects then step
 p.resetSimulation(p.RESET_USE_DEFORMABLE_WORLD)

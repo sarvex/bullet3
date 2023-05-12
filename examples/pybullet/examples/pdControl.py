@@ -69,6 +69,7 @@ p.setRealTimeSimulation(useRealTimeSim)
 
 timeStep = 0.001
 
+baseDof = 7
 while p.isConnected():
   #p.getCameraImage(320,200)
   timeStep = p.readUserDebugParameter(timeStepId)
@@ -88,7 +89,6 @@ while p.isConnected():
 
   basePos, baseOrn = p.getBasePositionAndOrientation(pole)
 
-  baseDof = 7
   taus = exPD.computePD(pole, [0, 1], [
       basePos[0], basePos[1], basePos[2], baseOrn[0], baseOrn[1], baseOrn[2], baseOrn[3],
       desiredPosCart, desiredPosPole

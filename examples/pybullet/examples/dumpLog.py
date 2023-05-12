@@ -33,9 +33,9 @@ def readLogFile(filename, verbose=True):
     print(ncols)
 
   lenChunk = sz
-  log = list()
+  log = []
   chunkIndex = 0
-  while (lenChunk):
+  while lenChunk:
     check = f.read(2)
     lenChunk = 0
     if (check == b'\xaa\xbb'):
@@ -52,7 +52,7 @@ def readLogFile(filename, verbose=True):
           print("chunk #", chunkIndex)
           chunkIndex = chunkIndex + 1
           values = struct.unpack(fmt, chunk)
-          record = list()
+          record = []
           for i in range(ncols):
             record.append(values[i])
             if verbose:
@@ -67,12 +67,8 @@ def readLogFile(filename, verbose=True):
 numArgs = len(sys.argv)
 
 print('Number of arguments:', numArgs, 'arguments.')
-print('Argument List:', str(sys.argv))
-fileName = "log.bin"
-
-if (numArgs > 1):
-  fileName = sys.argv[1]
-
+print('Argument List:', sys.argv)
+fileName = sys.argv[1] if (numArgs > 1) else "log.bin"
 print("filename=")
 print(fileName)
 

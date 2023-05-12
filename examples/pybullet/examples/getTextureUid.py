@@ -13,9 +13,9 @@ print("texUid=", texUid)
 
 p.changeVisualShape(plane, -1, textureUniqueId=texUid)
 
-for i in range(100):
+for _ in range(100):
   p.getCameraImage(320, 200)
 p.changeVisualShape(plane, -1, textureUniqueId=curTexUid)
 
-for i in range(100):
+for _ in range(100):
   p.getCameraImage(320, 200)

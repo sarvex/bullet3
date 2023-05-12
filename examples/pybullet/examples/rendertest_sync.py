@@ -44,8 +44,8 @@ class TestEnv(gym.Env):
     self._render_width = 84
     self._render_height = 84
     # connecting
-    if self._renderer == "tiny" or self._renderer == "plugin":
-      optionstring = '--width={} --height={}'.format(self._render_width, self._render_height)
+    if self._renderer in ["tiny", "plugin"]:
+      optionstring = f'--width={self._render_width} --height={self._render_height}'
       p.connect(p.DIRECT, options=optionstring)
 
       if self._renderer == "plugin":
@@ -59,8 +59,7 @@ class TestEnv(gym.Env):
         print("plugin =", plugin)
 
     elif self._renderer == "egl":
-      optionstring = '--width={} --height={}'.format(self._render_width, self._render_height)
-      optionstring += ' --window_backend=2 --render_device=0'
+      optionstring = f'--width={self._render_width} --height={self._render_height} --window_backend=2 --render_device=0'
       p.connect(p.GUI, options=optionstring)
 
     elif self._renderer == "debug":
@@ -109,10 +108,7 @@ def train(env_id, num_timesteps=300, seed=0, num_env=2, renderer='tiny'):
   def make_env(rank):
 
     def _thunk():
-      if env_id == "TestEnv":
-        env = TestEnv(renderer=renderer)  #gym.make(env_id)
-      else:
-        env = gym.make(env_id)
+      env = TestEnv(renderer=renderer) if env_id == "TestEnv" else gym.make(env_id)
       env.seed(seed + rank)
       env = bench.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)))
       gym.logger.setLevel(logging.WARN)
@@ -131,10 +127,7 @@ def train(env_id, num_timesteps=300, seed=0, num_env=2, renderer='tiny'):
     env.step(action)
   stop = time.time()
   duration = (stop - start)
-  if (duration):
-    fps = num_timesteps / duration
-  else:
-    fps = 0
+  fps = num_timesteps / duration if duration else 0
   env.close()
   return num_env, fps
 

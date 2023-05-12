@@ -36,7 +36,7 @@ def readLogFile(filename, verbose=True):
   wholeFile = f.read()
   # split by alignment word
   chunks = wholeFile.split(b'\xaa\xbb')
-  log = list()
+  log = []
   if verbose:
     print("num chunks:")
     print(len(chunks))
@@ -47,7 +47,7 @@ def readLogFile(filename, verbose=True):
       print("chunk #", chunkIndex)
       chunkIndex = chunkIndex + 1
       values = struct.unpack(fmt, chunk)
-      record = list()
+      record = []
       for i in range(ncols):
         record.append(values[i])
         if verbose:
@@ -61,12 +61,8 @@ def readLogFile(filename, verbose=True):
 numArgs = len(sys.argv)
 
 print('Number of arguments:', numArgs, 'arguments.')
-print('Argument List:', str(sys.argv))
-fileName = "data/example_log_vr.bin"
-
-if (numArgs > 1):
-  fileName = sys.argv[1]
-
+print('Argument List:', sys.argv)
+fileName = sys.argv[1] if (numArgs > 1) else "data/example_log_vr.bin"
 print("filename=")
 print(fileName)
 
@@ -93,7 +89,7 @@ for record in log:
   buttonIndex = 0
   for packedButtonIndex in range(firstPackedButtonIndex,
                                  firstPackedButtonIndex + numPackedButtons):
-    for packButtonShift in range(numGroupedButtons):
+    for _ in range(numGroupedButtons):
       buttonEvent = buttonMask & record[packedButtonIndex]
       if buttonEvent & 1:
         buttonDownIndices.append(buttonIndex)

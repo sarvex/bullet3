@@ -79,15 +79,15 @@ def get_world_link_pose(body_unique_id: int, link_index: int):
         local_inertial_pose = (dynamics_info[3], dynamics_info[4])
 
         local_inertial_pose_inv = p.invertTransform(local_inertial_pose[0], local_inertial_pose[1])
-        pos_orn = p.multiplyTransforms(world_inertial_pose[0],
-                                       world_inertial_pose[1],
-                                       local_inertial_pose_inv[0],
-                                       local_inertial_pose_inv[1])
+        return p.multiplyTransforms(
+            world_inertial_pose[0],
+            world_inertial_pose[1],
+            local_inertial_pose_inv[0],
+            local_inertial_pose_inv[1],
+        )
     else:
         state = p.getLinkState(body_unique_id, link_index)
-        pos_orn = (state[4], state[5])
-
-    return pos_orn
+        return state[4], state[5]
 
 
 def get_world_inertial_pose(body_unique_id: int, link_index: int):
@@ -101,12 +101,9 @@ def get_world_inertial_pose(body_unique_id: int, link_index: int):
         pos_orn (tuple): See description.
     """
     if link_index == -1:
-        pos_orn = p.getBasePositionAndOrientation(body_unique_id)
-    else:
-        state = p.getLinkState(body_unique_id, link_index)
-        pos_orn = (state[0], state[1])
-
-    return pos_orn
+        return p.getBasePositionAndOrientation(body_unique_id)
+    state = p.getLinkState(body_unique_id, link_index)
+    return state[0], state[1]
 
 
 def get_world_visual_pose(body_unique_id: int, link_index: int):
@@ -176,11 +173,12 @@ class Frame(Enum):
     VISUAL = 4
 
 
-FRAME_NAME = dict()
-FRAME_NAME[Frame.LINK] = 'link'
-FRAME_NAME[Frame.INERTIAL] = 'inertial'
-FRAME_NAME[Frame.COLLISION] = 'collision'
-FRAME_NAME[Frame.VISUAL] = 'visual'
+FRAME_NAME = {
+    Frame.LINK: 'link',
+    Frame.INERTIAL: 'inertial',
+    Frame.COLLISION: 'collision',
+    Frame.VISUAL: 'visual',
+}
 
 
 def draw_frame(body_unique_id: int,
@@ -218,10 +216,7 @@ def draw_frame(body_unique_id: int,
     pos = np.array(world_pose[0])
     orn_mat = np.array(p.getMatrixFromQuaternion(world_pose[1])).reshape((3, 3))
 
-    kwargs = dict()
-    kwargs['lineWidth'] = 3
-
-    kwargs['lineColorRGB'] = [1, 0, 0]
+    kwargs = {'lineWidth': 3, 'lineColorRGB': [1, 0, 0]}
     if replace_item_unique_id is not None:
         kwargs['replaceItemUniqueId'] = replace_item_unique_id[0]
     x = p.addUserDebugLine(pos, pos + axis_scale * orn_mat[0:3, 0], **kwargs)
@@ -251,7 +246,7 @@ class FrameDrawManager:
     """
 
     def __init__(self):
-        self.line_indices = dict()
+        self.line_indices = {}
 
     def _add_frame(self, frame: Frame, body_unique_id: int, link_index: int):
         # Workaround for the following problem:
@@ -261,15 +256,15 @@ class FrameDrawManager:
         time.sleep(1 / 100)
 
         if self.line_indices.get(body_unique_id) is None:
-            self.line_indices[body_unique_id] = dict()
+            self.line_indices[body_unique_id] = {}
 
         if self.line_indices[body_unique_id].get(frame) is None:
-            self.line_indices[body_unique_id][frame] = dict()
+            self.line_indices[body_unique_id][frame] = {}
 
         if self.line_indices[body_unique_id][frame].get(link_index) is None:
-            data = dict()
-            data['title'] = \
-                get_link_name(body_unique_id, link_index) + " (" + FRAME_NAME[frame] + " frame)"
+            data = {
+                'title': f"{get_link_name(body_unique_id, link_index)} ({FRAME_NAME[frame]} frame)"
+            }
             data['replace_item_unique_id'] = draw_frame(body_unique_id,
                                                         link_index,
                                                         frame,
@@ -335,17 +330,17 @@ else:
     for i in range(-1, p.getNumJoints(body)):
         frame_draw_manager.add_inertial_frame(body, i)
 
-if apply_force_torque:
-    while 1:
+while 1:
+    if apply_force_torque:
         # The following two options are equivalent and are suppose to hold the body in place.
-        if apply_force_local:
-            for i in range(-1, p.getNumJoints(body)):
+        for i in range(-1, p.getNumJoints(body)):
+                    # The following two options are equivalent and are suppose to hold the body in place.
+            if apply_force_local:
                 pose = get_world_inertial_pose(body, i)
                 pose_inv = p.invertTransform(pose[0], pose[1])
                 force = p.multiplyTransforms([0, 0, 0], pose_inv[1], [0, 0, 10], [0, 0, 0, 1])
                 p.applyExternalForce(body, i, force[0], [0, 0, 0], flags=p.LINK_FRAME)
-        else:
-            for i in range(-1, p.getNumJoints(body)):
+            else:
                 pose = get_world_inertial_pose(body, i)
                 p.applyExternalForce(body, i, [0, 0, 10], pose[0], flags=p.WORLD_FRAME)
 
@@ -354,17 +349,13 @@ if apply_force_torque:
                 p.applyExternalTorque(body, -1, [0, 0, 100], flags=p.LINK_FRAME)
             else:
                 p.applyExternalTorque(body, -1, [0, 0, 100], flags=p.WORLD_FRAME)
+        elif apply_torque_local:
+            p.applyExternalTorque(body, -1, [0, 0, 100], flags=p.LINK_FRAME)
+            p.applyExternalTorque(body, 0, [0, 0, 100], flags=p.LINK_FRAME)
         else:
-            if apply_torque_local:
-                p.applyExternalTorque(body, -1, [0, 0, 100], flags=p.LINK_FRAME)
-                p.applyExternalTorque(body, 0, [0, 0, 100], flags=p.LINK_FRAME)
-            else:
-                p.applyExternalTorque(body, -1, [0, 0, 100], flags=p.WORLD_FRAME)
-                p.applyExternalTorque(body, 0, [0, 0, 100], flags=p.WORLD_FRAME)
+            p.applyExternalTorque(body, -1, [0, 0, 100], flags=p.WORLD_FRAME)
+            p.applyExternalTorque(body, 0, [0, 0, 100], flags=p.WORLD_FRAME)
 
         p.stepSimulation()
         frame_draw_manager.update()
-        time.sleep(1 / 10)
-else:
-    while 1:
-        time.sleep(1 / 10)
+    time.sleep(1 / 10)

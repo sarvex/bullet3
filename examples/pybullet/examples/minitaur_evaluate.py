@@ -7,7 +7,7 @@ import math
 
 minitaur = None
 
-evaluate_func_map = dict()
+evaluate_func_map = {}
 
 
 def current_position():
@@ -44,8 +44,7 @@ def evaluate_desired_motorAngle_2Amplitude4Phase(i, params):
   a5 = math.sin(i * speed + params[4]) * params[0] + 1.57
   a6 = math.sin(i * speed + params[5] + phaseDiff) * params[1] + 1.57
   a7 = math.sin(i * speed + params[5]) * params[0] + 1.57
-  joint_values = [a0, a1, a2, a3, a4, a5, a6, a7]
-  return joint_values
+  return [a0, a1, a2, a3, a4, a5, a6, a7]
 
 
 def evaluate_desired_motorAngle_hop(i, params):
@@ -53,8 +52,7 @@ def evaluate_desired_motorAngle_hop(i, params):
   speed = params[1]
   a1 = math.sin(i * speed) * amplitude + 1.57
   a2 = math.sin(i * speed + 3.14) * amplitude + 1.57
-  joint_values = [a1, 1.57, a2, 1.57, 1.57, a1, 1.57, a2]
-  return joint_values
+  return [a1, 1.57, a2, 1.57, 1.57, a1, 1.57, a2]
 
 
 evaluate_func_map[
@@ -76,7 +74,7 @@ def evaluate_params(evaluateFunc,
   p.resetSimulation()
 
   p.setTimeStep(timeStep)
-  p.loadURDF("%s/plane.urdf" % urdfRoot)
+  p.loadURDF(f"{urdfRoot}/plane.urdf")
   p.setGravity(0, 0, -10)
 
   global minitaur

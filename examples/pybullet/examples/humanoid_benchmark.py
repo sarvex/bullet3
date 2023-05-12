@@ -35,9 +35,10 @@ print("Starting benchmark")
 fileName = "pybullet_humanoid_timings.json"
 
 logId = p.startStateLogging(p.STATE_LOGGING_PROFILE_TIMINGS, fileName)
-for i in range(1000):
+for _ in range(1000):
   p.stepSimulation()
 p.stopStateLogging(logId)
 
 print("ended benchmark")
-print("Use Chrome browser, visit about://tracing, and load the %s file" % fileName)
+print(
+    f"Use Chrome browser, visit about://tracing, and load the {fileName} file")

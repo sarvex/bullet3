@@ -15,7 +15,7 @@ client.setGravity(0, 0, -10)
 
 print("Adding plane object")
 plane_id = client.loadURDF(PLANE_PATH)
-print("Plane ID: %s" % plane_id)
+print(f"Plane ID: {plane_id}")
 
 print("Adding user data to plane")
 MyKey1 = client.addUserData(plane_id, "MyKey1", "MyValue1")
@@ -41,7 +41,7 @@ print(client.getUserData(MyKey2))
 print(client.getUserData(MyKey3))
 print(client.getUserData(MyKey4))
 
-print("Number of user data entries: %s" % client.getNumUserData(plane_id))
+print(f"Number of user data entries: {client.getNumUserData(plane_id)}")
 
 print("Overriding user data")
 client.addUserData(plane_id, "MyKey1", "MyNewValue")
@@ -59,8 +59,9 @@ print("Synced overridden data")
 print(client.getUserData(MyKey1))
 
 print("Getting user data ID")
-print("Retrieved ID: %s, ID retrieved from addUserData: %s" %
-      (client.getUserDataId(plane_id, "MyKey2"), MyKey2))
+print(
+    f'Retrieved ID: {client.getUserDataId(plane_id, "MyKey2")}, ID retrieved from addUserData: {MyKey2}'
+)
 
 print("Removing user data")
 client.removeUserData(MyKey2)
@@ -77,8 +78,10 @@ print(client.getUserData(MyKey2))
 print("Iterating over all user data entries and printing results")
 for i in range(client.getNumUserData(plane_id)):
   userDataId, key, bodyId, linkIndex, visualShapeIndex = client.getUserDataInfo(plane_id, i)
-  print("Info: (%s, %s, %s, %s, %s)" % (userDataId, key, bodyId, linkIndex, visualShapeIndex))
-  print("Value: %s" % client.getUserData(userDataId))
+  print(
+      f"Info: ({userDataId}, {key}, {bodyId}, {linkIndex}, {visualShapeIndex})"
+  )
+  print(f"Value: {client.getUserData(userDataId)}")
 
 print("Removing body")
 client.removeBody(plane_id)
@@ -97,7 +100,7 @@ print(client.getUserData(MyKey3))
 print(client.getUserData(MyKey4))
 
 plane_id2 = client.loadURDF(PLANE_PATH)
-print("Plane1: %s, plane2: %s" % (plane_id, plane_id2))
+print(f"Plane1: {plane_id}, plane2: {plane_id2}")
 
 print("Retrieving user data")
 print(client.getUserData(MyKey1))

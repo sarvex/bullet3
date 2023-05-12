@@ -72,29 +72,28 @@ while 1:
     orn = p.getQuaternionFromEuler([0, -math.pi, 0])
 
     if (useNullSpace == 1):
-      if (useOrientation == 1):
-        jointPoses = p.calculateInverseKinematics(kukaId, kukaEndEffectorIndex, pos, orn, ll, ul,
-                                                  jr, rp)
-      else:
-        jointPoses = p.calculateInverseKinematics(kukaId,
-                                                  kukaEndEffectorIndex,
-                                                  pos,
-                                                  lowerLimits=ll,
-                                                  upperLimits=ul,
-                                                  jointRanges=jr,
-                                                  restPoses=rp)
+      jointPoses = (p.calculateInverseKinematics(kukaId, kukaEndEffectorIndex,
+                                                 pos, orn, ll, ul, jr, rp) if
+                    (useOrientation == 1) else p.calculateInverseKinematics(
+                        kukaId,
+                        kukaEndEffectorIndex,
+                        pos,
+                        lowerLimits=ll,
+                        upperLimits=ul,
+                        jointRanges=jr,
+                        restPoses=rp,
+                    ))
+    elif (useOrientation == 1):
+      jointPoses = p.calculateInverseKinematics(kukaId,
+                                                kukaEndEffectorIndex,
+                                                pos,
+                                                orn,
+                                                jointDamping=jd)
     else:
-      if (useOrientation == 1):
-        jointPoses = p.calculateInverseKinematics(kukaId,
-                                                  kukaEndEffectorIndex,
-                                                  pos,
-                                                  orn,
-                                                  jointDamping=jd)
-      else:
-        jointPoses = p.calculateInverseKinematics(kukaId, kukaEndEffectorIndex, pos)
+      jointPoses = p.calculateInverseKinematics(kukaId, kukaEndEffectorIndex, pos)
 
-    if (useSimulation):
-      for i in range(numJoints):
+    for i in range(numJoints):
+      if useSimulation:
         p.setJointMotorControl2(bodyIndex=kukaId,
                                 jointIndex=i,
                                 controlMode=p.POSITION_CONTROL,
@@ -103,9 +102,7 @@ while 1:
                                 force=500,
                                 positionGain=0.03,
                                 velocityGain=1)
-    else:
-      #reset the joint state (ignoring all dynamics, not recommended to use during simulation)
-      for i in range(numJoints):
+      else:
         p.resetJointState(kukaId, i, jointPoses[i])
 
   ls = p.getLinkState(kukaId, kukaEndEffectorIndex)

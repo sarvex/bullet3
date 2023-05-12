@@ -15,7 +15,7 @@ class Minitaur:
       jointInfo = p.getJointInfo(self.quadruped, i)
       self.jointNameToId[jointInfo[1].decode('UTF-8')] = jointInfo[0]
     self.resetPose()
-    for i in range(100):
+    for _ in range(100):
       p.stepSimulation()
 
   def buildMotorIdList(self):
@@ -29,7 +29,8 @@ class Minitaur:
     self.motorIdList.append(self.jointNameToId['motor_back_rightR_joint'])
 
   def reset(self):
-    self.quadruped = p.loadURDF("%s/quadruped/minitaur.urdf" % self.urdfRootPath, 0, 0, .2)
+    self.quadruped = p.loadURDF(f"{self.urdfRootPath}/quadruped/minitaur.urdf",
+                                0, 0, 0.2)
     self.kp = 1
     self.kd = 0.1
     self.maxForce = 3.5
@@ -174,21 +175,18 @@ class Minitaur:
     for i in range(self.nMotors):
       jointState = p.getJointState(self.quadruped, self.motorIdList[i])
       motorAngles.append(jointState[0])
-    motorAngles = np.multiply(motorAngles, self.motorDir)
-    return motorAngles
+    return np.multiply(motorAngles, self.motorDir)
 
   def getMotorVelocities(self):
     motorVelocities = []
     for i in range(self.nMotors):
       jointState = p.getJointState(self.quadruped, self.motorIdList[i])
       motorVelocities.append(jointState[1])
-    motorVelocities = np.multiply(motorVelocities, self.motorDir)
-    return motorVelocities
+    return np.multiply(motorVelocities, self.motorDir)
 
   def getMotorTorques(self):
     motorTorques = []
     for i in range(self.nMotors):
       jointState = p.getJointState(self.quadruped, self.motorIdList[i])
       motorTorques.append(jointState[3])
-    motorTorques = np.multiply(motorTorques, self.motorDir)
-    return motorTorques
+    return np.multiply(motorTorques, self.motorDir)

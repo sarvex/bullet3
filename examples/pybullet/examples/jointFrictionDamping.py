@@ -21,7 +21,7 @@ jointFrictionForceSlider = p.addUserDebugParameter("jointFrictionForce", 0, 0.1,
 
 textId = p.addUserDebugText("jointVelocity=0", [0, 0, -0.2])
 p.setRealTimeSimulation(1)
-while (1):
+while 1:
   frictionForce = p.readUserDebugParameter(jointFrictionForceSlider)
   angularDamping = p.readUserDebugParameter(angularDampingSlider)
   p.setJointMotorControl2(minitaur,
@@ -32,7 +32,7 @@ while (1):
   p.changeDynamics(minitaur, motorJointId, linearDamping=0, angularDamping=angularDamping)
 
   time.sleep(0.01)
-  txt = "jointVelocity=" + str(p.getJointState(minitaur, motorJointId)[1])
+  txt = f"jointVelocity={str(p.getJointState(minitaur, motorJointId)[1])}"
   prevTextId = textId
   textId = p.addUserDebugText(txt, [0, 0, -0.2])
   p.removeUserDebugItem(prevTextId)

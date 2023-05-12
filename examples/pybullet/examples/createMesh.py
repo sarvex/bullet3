@@ -43,7 +43,7 @@ visualShapeId = -1
 
 segmentStart = 0
 
-for i in range(segmentLength):
+for _ in range(segmentLength):
   p.createMultiBody(baseMass=0,
                     baseCollisionShapeIndex=colBoxId,
                     basePosition=[segmentStart, 0, -0.1])
@@ -71,11 +71,11 @@ for i in range(segmentLength):
                       basePosition=[segmentStart, i % 3, -0.1 + height + boxHalfWidth],
                       baseOrientation=baseOrientation)
 
+width = 4
 for i in range(segmentLength):
   p.createMultiBody(baseMass=0,
                     baseCollisionShapeIndex=colBoxId,
                     basePosition=[segmentStart, 0, -0.1])
-  width = 4
   for j in range(width):
     p.createMultiBody(baseMass=0,
                       baseCollisionShapeIndex=stoneId,

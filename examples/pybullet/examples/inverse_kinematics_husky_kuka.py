@@ -91,7 +91,7 @@ def accurateCalculateInverseKinematics(kukaId, endEffectorId, targetPos, thresho
     diff = [targetPos[0] - newPos[0], targetPos[1] - newPos[1], targetPos[2] - newPos[2]]
     dist2 = (diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2])
     closeEnough = (dist2 < threshold)
-    iter = iter + 1
+    iter += 1
   #print ("Num iter: "+str(iter) + "threshold: "+str(dist2))
   return jointPoses
 
@@ -104,11 +104,11 @@ wheels = [2, 3, 4, 5]
 wheelVelocities = [0, 0, 0, 0]
 wheelDeltasTurn = [1, -1, 1, -1]
 wheelDeltasFwd = [1, 1, 1, 1]
+shift = 0.01
+speed = 1.0
 while 1:
   keys = p.getKeyboardEvents()
-  shift = 0.01
   wheelVelocities = [0, 0, 0, 0]
-  speed = 1.0
   for k in keys:
     if ord('s') in keys:
       p.saveWorld("state.py")
@@ -138,12 +138,7 @@ while 1:
                             targetVelocity=wheelVelocities[i],
                             force=1000)
   #p.resetBasePositionAndOrientation(kukaId,basepos,baseorn)#[0,0,0,1])
-  if (useRealTimeSimulation):
-    t = time.time()  #(dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
-    #t = (dt.second/60.)*2.*math.pi
-  else:
-    t = t + 0.001
-
+  t = time.time() if useRealTimeSimulation else t + 0.001
   if (useSimulation and useRealTimeSimulation == 0):
     p.stepSimulation()
 
@@ -154,29 +149,28 @@ while 1:
     orn = p.getQuaternionFromEuler([0, -math.pi, 0])
 
     if (useNullSpace == 1):
-      if (useOrientation == 1):
-        jointPoses = p.calculateInverseKinematics(kukaId, kukaEndEffectorIndex, pos, orn, ll, ul,
-                                                  jr, rp)
-      else:
-        jointPoses = p.calculateInverseKinematics(kukaId,
-                                                  kukaEndEffectorIndex,
-                                                  pos,
-                                                  lowerLimits=ll,
-                                                  upperLimits=ul,
-                                                  jointRanges=jr,
-                                                  restPoses=rp)
+      jointPoses = (p.calculateInverseKinematics(kukaId, kukaEndEffectorIndex,
+                                                 pos, orn, ll, ul, jr, rp) if
+                    (useOrientation == 1) else p.calculateInverseKinematics(
+                        kukaId,
+                        kukaEndEffectorIndex,
+                        pos,
+                        lowerLimits=ll,
+                        upperLimits=ul,
+                        jointRanges=jr,
+                        restPoses=rp,
+                    ))
+    elif (useOrientation == 1):
+      jointPoses = p.calculateInverseKinematics(kukaId,
+                                                kukaEndEffectorIndex,
+                                                pos,
+                                                orn,
+                                                jointDamping=jd)
     else:
-      if (useOrientation == 1):
-        jointPoses = p.calculateInverseKinematics(kukaId,
-                                                  kukaEndEffectorIndex,
-                                                  pos,
-                                                  orn,
-                                                  jointDamping=jd)
-      else:
-        threshold = 0.001
-        maxIter = 100
-        jointPoses = accurateCalculateInverseKinematics(kukaId, kukaEndEffectorIndex, pos,
-                                                        threshold, maxIter)
+      threshold = 0.001
+      maxIter = 100
+      jointPoses = accurateCalculateInverseKinematics(kukaId, kukaEndEffectorIndex, pos,
+                                                      threshold, maxIter)
 
     if (useSimulation):
       for i in range(numJoints):

@@ -25,8 +25,7 @@ pybullet.connect(pybullet.DIRECT)
 
 pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
 
-egl = pkgutil.get_loader('eglRenderer')
-if (egl):
+if egl := pkgutil.get_loader('eglRenderer'):
   pluginId = pybullet.loadPlugin(egl.get_filename(), "_eglRendererPlugin")
 else:
   pluginId = pybullet.loadPlugin("eglRendererPlugin")

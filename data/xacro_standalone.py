@@ -66,12 +66,10 @@ def fixed_writexml(self, writer, indent="", addindent="", newl=""):
   # indent = current indentation
   # addindent = indentation to add to higher levels
   # newl = newline string
-  writer.write(indent + "<" + self.tagName)
+  writer.write(f"{indent}<{self.tagName}")
 
   attrs = self._get_attributes()
-  a_names = list(attrs.keys())
-  a_names.sort()
-
+  a_names = sorted(attrs.keys())
   for a_name in a_names:
     writer.write(" %s=\"" % a_name)
     xml.dom.minidom._write_data(writer, attrs[a_name].value)
@@ -81,18 +79,18 @@ def fixed_writexml(self, writer, indent="", addindent="", newl=""):
        and self.childNodes[0].nodeType == xml.dom.minidom.Node.TEXT_NODE:
       writer.write(">")
       self.childNodes[0].writexml(writer, "", "", "")
-      writer.write("</%s>%s" % (self.tagName, newl))
+      writer.write(f"</{self.tagName}>{newl}")
       return
-    writer.write(">%s" % (newl))
+    writer.write(f">{newl}")
     for node in self.childNodes:
       # skip whitespace-only text nodes
       if node.nodeType == xml.dom.minidom.Node.TEXT_NODE and \
          not node.data.strip():
         continue
       node.writexml(writer, indent + addindent, addindent, newl)
-    writer.write("%s</%s>%s" % (indent, self.tagName, newl))
+    writer.write(f"{indent}</{self.tagName}>{newl}")
   else:
-    writer.write("/>%s" % (newl))
+    writer.write(f"/>{newl}")
 
 
 # replace minidom's function with ours
@@ -144,9 +142,8 @@ class QuickLexer(object):
     result = self.top
     self.top = None
     for i in range(len(self.res)):
-      m = re.match(self.res[i], self.str)
-      if m:
-        self.top = (i, m.group(0))
+      if m := re.match(self.res[i], self.str):
+        self.top = i, m[0]
         self.str = self.str[m.end():]
         break
     return result
@@ -172,12 +169,10 @@ def next_sibling_element(elt):
 
 # Pre-order traversal of the elements
 def next_element(elt):
-  child = first_child_element(elt)
-  if child:
+  if child := first_child_element(elt):
     return child
   while elt and elt.nodeType == xml.dom.Node.ELEMENT_NODE:
-    next = next_sibling_element(elt)
-    if next:
+    if next := next_sibling_element(elt):
       return next
     elt = elt.parentNode
   return None
@@ -217,28 +212,21 @@ include_no_matches_msg = """Include tag filename spec \"{}\" matched no files.""
 def process_includes(doc, base_dir):
   namespaces = {}
   previous = doc.documentElement
-  elt = next_element(previous)
-  while elt:
+  while elt := next_element(previous):
     # Xacro should not use plain 'include' tags but only namespaced ones. Causes conflicts with
     # other XML elements including Gazebo's <gazebo> extensions
     is_include = False
-    if elt.tagName == 'xacro:include' or elt.tagName == 'include':
+    if elt.tagName in ['xacro:include', 'include']:
 
       is_include = True
-      # Temporary fix for ROS Hydro and the xacro include scope problem
-      if elt.tagName == 'include':
-
-        # check if there is any element within the <include> tag. mostly we are concerned
-        # with Gazebo's <uri> element, but it could be anything. also, make sure the child
-        # nodes aren't just a single Text node, which is still considered a deprecated
-        # instance
-        if elt.childNodes and not (len(elt.childNodes) == 1 and
-                                   elt.childNodes[0].nodeType == elt.TEXT_NODE):
-          # this is not intended to be a xacro element, so we can ignore it
-          is_include = False
-        else:
-          # throw a deprecated warning
-          print(deprecated_include_msg, file=sys.stderr)
+    if elt.tagName == 'include':
+      if elt.childNodes and (len(elt.childNodes) != 1
+                             or elt.childNodes[0].nodeType != elt.TEXT_NODE):
+        # this is not intended to be a xacro element, so we can ignore it
+        is_include = False
+      else:
+        # throw a deprecated warning
+        print(deprecated_include_msg, file=sys.stderr)
 
     # Process current element depending on previous conditions
     if is_include:
@@ -283,8 +271,6 @@ def process_includes(doc, base_dir):
     else:
       previous = elt
 
-    elt = next_element(previous)
-
   # Makes sure the final document declares all the namespaces of the included documents.
   for k, v in namespaces.items():
     doc.documentElement.setAttribute(k, v)
@@ -295,20 +281,18 @@ def grab_macros(doc):
   macros = {}
 
   previous = doc.documentElement
-  elt = next_element(previous)
-  while elt:
-    if elt.tagName == 'macro' or elt.tagName == 'xacro:macro':
+  while elt := next_element(previous):
+    if elt.tagName in ['macro', 'xacro:macro']:
       name = elt.getAttribute('name')
 
       macros[name] = elt
-      macros['xacro:' + name] = elt
+      macros[f'xacro:{name}'] = elt
 
       elt.parentNode.removeChild(elt)
       elt = None
     else:
       previous = elt
 
-    elt = next_element(previous)
   return macros
 
 
@@ -317,25 +301,19 @@ def grab_properties(doc):
   table = Table()
 
   previous = doc.documentElement
-  elt = next_element(previous)
-  while elt:
-    if elt.tagName == 'property' or elt.tagName == 'xacro:property':
+  while elt := next_element(previous):
+    if elt.tagName in ['property', 'xacro:property']:
       name = elt.getAttribute('name')
       value = None
 
       if elt.hasAttribute('value'):
         value = elt.getAttribute('value')
       else:
-        name = '**' + name
+        name = f'**{name}'
         value = elt  # debug
 
       bad = string.whitespace + "${}"
-      has_bad = False
-      for b in bad:
-        if b in name:
-          has_bad = True
-          break
-
+      has_bad = any(b in name for b in bad)
       if has_bad:
         sys.stderr.write('Property names may not have whitespace, ' + '"{", "}", or "$" : "' +
                          name + '"')
@@ -347,7 +325,6 @@ def grab_properties(doc):
     else:
       previous = elt
 
-    elt = next_element(previous)
   return table
 
 
@@ -365,10 +342,10 @@ def eval_lit(lex, symbols):
       key = lex.next()[1]
       value = symbols[key]
     except KeyError as ex:
-      raise XacroException("Property wasn't defined: %s" % str(ex))
+      raise XacroException(f"Property wasn't defined: {str(ex)}")
     if not (isnumber(value) or isinstance(value, _basestr)):
       if value is None:
-        raise XacroException("Property %s recursively used" % key)
+        raise XacroException(f"Property {key} recursively used")
       raise XacroException("WTF2")
     try:
       return int(value)
@@ -437,7 +414,7 @@ def eval_expr(lex, symbols):
   op = None
   if lex.peek()[0] == lex.OP:
     op = lex.next()[1]
-    if not op in ['+', '-']:
+    if op not in ['+', '-']:
       raise XacroException("Invalid operation. Must be '+' or '-'")
 
   result = eval_term(lex, symbols)
@@ -470,7 +447,7 @@ def eval_text(text, symbols):
     return eval_expr(lex, symbols)
 
   def handle_extension(s):
-    return ("$(%s)" % s)
+    return f"$({s})"
 
   results = []
   lex = QuickLexer(DOLLAR_DOLLAR_BRACE=r"\$\$+\{",
@@ -498,8 +475,7 @@ def eval_all(root, macros, symbols):
     root.setAttribute(at[0], result)
 
   previous = root
-  node = next_node(previous)
-  while node:
+  while node := next_node(previous):
     if node.nodeType == xml.dom.Node.ELEMENT_NODE:
       if node.tagName in macros:
         body = macros[node.tagName].cloneNode(deep=True)
@@ -521,7 +497,7 @@ def eval_all(root, macros, symbols):
         # Expands the macro
         scoped = Table(symbols)
         for name, value in node.attributes.items():
-          if not name in params:
+          if name not in params:
             raise XacroException("Invalid parameter \"%s\" while expanding macro \"%s\"" %
                                  (str(name), str(node.tagName)))
           params.remove(name)
@@ -536,8 +512,9 @@ def eval_all(root, macros, symbols):
             while block and block.nodeType != xml.dom.Node.ELEMENT_NODE:
               block = block.nextSibling
             if not block:
-              raise XacroException("Not enough blocks while evaluating macro %s" %
-                                   str(node.tagName))
+              raise XacroException(
+                  f"Not enough blocks while evaluating macro {str(node.tagName)}"
+              )
             params.remove(param)
             scoped[param] = block
             block = block.nextSibling
@@ -549,8 +526,9 @@ def eval_all(root, macros, symbols):
             params.remove(param)
 
         if params:
-          raise XacroException("Parameters [%s] were not set for macro %s" %
-                               (",".join(params), str(node.tagName)))
+          raise XacroException(
+              f'Parameters [{",".join(params)}] were not set for macro {str(node.tagName)}'
+          )
         eval_all(body, macros, scoped)
 
         # Replaces the macro node with the expansion
@@ -559,7 +537,7 @@ def eval_all(root, macros, symbols):
         node.parentNode.removeChild(node)
 
         node = None
-      elif node.tagName == 'arg' or node.tagName == 'xacro:arg':
+      elif node.tagName in ['arg', 'xacro:arg']:
         name = node.getAttribute('name')
         if not name:
           raise XacroException("Argument name missing")
@@ -570,19 +548,19 @@ def eval_all(root, macros, symbols):
         node.parentNode.removeChild(node)
         node = None
 
-      elif node.tagName == 'insert_block' or node.tagName == 'xacro:insert_block':
+      elif node.tagName in ['insert_block', 'xacro:insert_block']:
         name = node.getAttribute('name')
 
-        if ("**" + name) in symbols:
+        if f"**{name}" in symbols:
           # Multi-block
-          block = symbols['**' + name]
+          block = symbols[f'**{name}']
 
           for e in list(child_nodes(block)):
             node.parentNode.insertBefore(e.cloneNode(deep=True), node)
           node.parentNode.removeChild(node)
-        elif ("*" + name) in symbols:
+        elif f"*{name}" in symbols:
           # Single block
-          block = symbols['*' + name]
+          block = symbols[f'*{name}']
 
           node.parentNode.insertBefore(block.cloneNode(deep=True), node)
           node.parentNode.removeChild(node)
@@ -593,9 +571,12 @@ def eval_all(root, macros, symbols):
       elif node.tagName in ['if', 'xacro:if', 'unless', 'xacro:unless']:
         value = eval_text(node.getAttribute('value'), symbols)
         try:
-          if value == 'true': keep = True
-          elif value == 'false': keep = False
-          else: keep = float(value)
+          if value == 'false':
+            keep = False
+          elif value == 'true':
+            if value == 'true': keep = True
+          else:
+            keep = float(value)
         except ValueError:
           raise XacroException(
               "Xacro conditional evaluated to \"%s\". Acceptable evaluations are one of [\"1\",\"true\",\"0\",\"false\"]"
@@ -618,7 +599,6 @@ def eval_all(root, macros, symbols):
     else:
       previous = node
 
-    node = next_node(previous)
   return macros
 
 
@@ -630,9 +610,9 @@ def eval_self_contained(doc):
 
 
 def print_usage(exit_code=0):
-  print("Usage: %s [-o <output>] <input>" % 'xacro.py')
-  print("       %s --deps       Prints dependencies" % 'xacro.py')
-  print("       %s --includes   Only evalutes includes" % 'xacro.py')
+  print('Usage: xacro.py [-o <output>] <input>')
+  print('       xacro.py --deps       Prints dependencies')
+  print('       xacro.py --includes   Only evalutes includes')
   sys.exit(exit_code)
 
 
@@ -641,17 +621,14 @@ def set_substitution_args_context(context={}):
 
 
 def open_output(output_filename):
-  if output_filename is None:
-    return sys.stdout
-  else:
-    return open(output_filename, 'w')
+  return sys.stdout if output_filename is None else open(output_filename, 'w')
 
 
 def main():
   try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], "ho:", ['deps', 'includes'])
   except getopt.GetoptError as err:
-    print(str(err))
+    print(err)
     print_usage(2)
 
   just_deps = False
@@ -659,15 +636,15 @@ def main():
 
   output_filename = None
   for o, a in opts:
-    if o == '-h':
-      print_usage(0)
-    elif o == '-o':
-      output_filename = a
-    elif o == '--deps':
+    if o == '--deps':
       just_deps = True
     elif o == '--includes':
       just_includes = True
 
+    elif o == '-h':
+      print_usage(0)
+    elif o == '-o':
+      output_filename = a
   if len(args) < 1:
     print("No input given")
     print_usage(2)
@@ -693,7 +670,7 @@ def main():
   process_includes(doc, os.path.dirname(args[0]))
   if just_deps:
     for inc in all_includes:
-      sys.stdout.write(inc + " ")
+      sys.stdout.write(f"{inc} ")
     sys.stdout.write("\n")
   elif just_includes:
     doc.writexml(open_output(output_filename))
@@ -702,10 +679,12 @@ def main():
     eval_self_contained(doc)
     banner = [
         xml.dom.minidom.Comment(c) for c in [
-            " %s " % ('=' * 83),
-            " |    This document was autogenerated by xacro from %-30s | " % args[0],
-            " |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED  %-30s | " % "",
-            " %s " % ('=' * 83)
+            f" {'=' * 83} ",
+            " |    This document was autogenerated by xacro from %-30s | " %
+            args[0],
+            " |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED  %-30s | " %
+            "",
+            f" {'=' * 83} ",
         ]
     ]
     first = doc.firstChild

@@ -77,6 +77,6 @@ for i in range(p.getNumJoints(r2d2)):
   if (draw == 1):
     drawAABB(aabb)
 
-while (1):
-  a = 0
+a = 0
+while 1:
   p.stepSimulation()

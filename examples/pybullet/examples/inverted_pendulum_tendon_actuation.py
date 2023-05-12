@@ -4,6 +4,7 @@ https://valerolab.org/
 PID control of an inverted pendulum actuated by strings.
 """
 
+
 import pybullet as p
 import time
 import math as m
@@ -45,8 +46,8 @@ cubeStartPos = [-2.15,0,.75]
 cubeStartPos2 = [0,0,1.4]
 cubeStartPos3 = [2.15,0,.75]
 
-PulleyStartOrientation = p.getQuaternionFromEuler([1.570796, 0, 0])  
-cubeStartOrientation = p.getQuaternionFromEuler([0,0,0]) 
+PulleyStartOrientation = p.getQuaternionFromEuler([1.570796, 0, 0])
+cubeStartOrientation = p.getQuaternionFromEuler([0,0,0])
 cubeStartOrientation2 = p.getQuaternionFromEuler([0,-1.570796,0])
 
 base_1 = p.loadURDF("Base_1.urdf",cubeStartPos3, cubeStartOrientation, useFixedBase=1, flags=p.URDF_USE_SELF_COLLISION) #Base 1: magenta base and tendon
@@ -98,45 +99,45 @@ p.setJointMotorControl2(base_2, Base_pulley_2, p.VELOCITY_CONTROL, targetVelocit
 p.setGravity(0,0,-10)
 
 
-for i in range (time_steps):
-    p.stepSimulation()
-    pendulum_angle = p.getJointState(pendulum,cart_pendulumAxis)
-    pendulum_angle = pendulum_angle[0]
-    angle_delta_error = -pendulum_angle
+for _ in range (time_steps):
+  p.stepSimulation()
+  pendulum_angle = p.getJointState(pendulum,cart_pendulumAxis)
+  pendulum_angle = pendulum_angle[0]
+  angle_delta_error = -pendulum_angle
 
-    #PROPPORTIONAL
-    p_correction = proportional_gain * pendulum_angle
+  #PROPPORTIONAL
+  p_correction = proportional_gain * pendulum_angle
 
-    #INTEGRAL
-    i_correction = integral_gain * (previous_pendulum_angle + pendulum_angle)
-    previous_pendulum_angle = pendulum_angle
+  #INTEGRAL
+  i_correction = integral_gain * (previous_pendulum_angle + pendulum_angle)
+  previous_pendulum_angle = pendulum_angle
 
-    #DERIVATIVE
-    d_correction = derivative_gain * angle_delta_error
+  #DERIVATIVE
+  d_correction = derivative_gain * angle_delta_error
 
-    u = p_correction + i_correction + d_correction + 10
-    
-    u = abs(u)
-    if u<u_lower_limit:
-      u=u_lower_limit
-    elif u>u_upper_limit:
-      u=u_upper_limit   
-    
-    if pendulum_angle > 0:
-      u_pulley_1 = u * u_factor   #Base 1: magenta base and tendon
-      u_pulley_2 = -tension_force #Base 2: white base and tendon
-      #print(">0")
-    else:
-      u_pulley_1 = tension_force  #Base 1: magenta base and tendon
-      u_pulley_2 = -u * u_factor  #Base 2: white base and tendon
-      #print("<0")
+  u = p_correction + i_correction + d_correction + 10
 
-    p.setJointMotorControl2(base_1, Base_pulley_1, p.VELOCITY_CONTROL, targetVelocity=100, force = u_pulley_1)  
-    p.setJointMotorControl2(base_2, Base_pulley_2, p.VELOCITY_CONTROL, targetVelocity=100, force = u_pulley_2)  
+  u = abs(u)
+  if u<u_lower_limit:
+    u=u_lower_limit
+  elif u>u_upper_limit:
+    u=u_upper_limit   
 
-    history = np.append(history , [[ u_pulley_1, u_pulley_2, pendulum_angle]] , axis = 0)    
-        
-    time.sleep(1./240.)
+  if pendulum_angle > 0:
+    u_pulley_1 = u * u_factor   #Base 1: magenta base and tendon
+    u_pulley_2 = -tension_force #Base 2: white base and tendon
+    #print(">0")
+  else:
+    u_pulley_1 = tension_force  #Base 1: magenta base and tendon
+    u_pulley_2 = -u * u_factor  #Base 2: white base and tendon
+    #print("<0")
+
+  p.setJointMotorControl2(base_1, Base_pulley_1, p.VELOCITY_CONTROL, targetVelocity=100, force = u_pulley_1)
+  p.setJointMotorControl2(base_2, Base_pulley_2, p.VELOCITY_CONTROL, targetVelocity=100, force = u_pulley_2)  
+
+  history = np.append(history , [[ u_pulley_1, u_pulley_2, pendulum_angle]] , axis = 0)    
+
+  time.sleep(1./240.)
 
 print("Done with simulation")
 
@@ -149,7 +150,7 @@ ax1.set_ylim((-12000,12000))
 
 plt.legend(loc='best', bbox_to_anchor=(0.5, 0., 0.5, 0.5),
            ncol=1, mode=None, borderaxespad=0.)
-plt.title("Ctrl Input and Angle History") 
+plt.title("Ctrl Input and Angle History")
 plt.grid(True)
 color = 'tab:red'
 ax2 = ax1.twinx()
@@ -160,7 +161,7 @@ ax2.set_ylim((-90,90))
 
 fig.tight_layout()
 plt.show()
-    
+
 p.disconnect()
 
 

@@ -21,7 +21,7 @@ for j in range(p.getNumJoints(humanoid)):
   #print(info)
   jointName = info[1]
   jointType = info[2]
-  if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
+  if jointType in [p.JOINT_PRISMATIC, p.JOINT_REVOLUTE]:
     jointIds.append(j)
     paramIds.append(p.addUserDebugParameter(jointName.decode("utf-8"), -4, 4, 0))
 

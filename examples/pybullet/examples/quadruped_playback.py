@@ -43,13 +43,11 @@ def readLogFile(filename, verbose=True):
   print("num chunks")
   print(len(chunks))
 
-  log = list()
+  log = []
   for chunk in chunks:
     if len(chunk) == sz:
       values = struct.unpack(fmt, chunk)
-      record = list()
-      for i in range(ncols):
-        record.append(values[i])
+      record = [values[i] for i in range(ncols)]
       log.append(record)
 
   return log

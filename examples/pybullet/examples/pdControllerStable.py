@@ -49,10 +49,7 @@ class PDControllerStableMultiDof(object):
         axis = self._pb.getAxisDifferenceQuaternion(desiredPos, jointPos)
         jointVelNew = [jointVel[0], jointVel[1], jointVel[2], 0]
         qdot1 += jointVelNew
-        qError.append(axis[0])
-        qError.append(axis[1])
-        qError.append(axis[2])
-        qError.append(0)
+        qError.extend((axis[0], axis[1], axis[2], 0))
         desiredVel = [
             desiredVelocities[qdotIndex], desiredVelocities[qdotIndex + 1],
             desiredVelocities[qdotIndex + 2]
@@ -89,8 +86,7 @@ class PDControllerStableMultiDof(object):
     tau = p_term + d_term - Kd.dot(qddot) * timeStep
     # Clip generalized forces to actuator limits
     maxF = np.array(maxForces)
-    generalized_forces = np.clip(tau, -maxF, maxF)
-    return generalized_forces
+    return np.clip(tau, -maxF, maxF)
 
 
 class PDControllerStable(object):
@@ -143,5 +139,4 @@ class PDControllerStable(object):
     tau = p_term + d_term - (Kd.dot(qddot) * timeStep)
     # Clip generalized forces to actuator limits
     maxF = np.array(maxForces)
-    generalized_forces = np.clip(tau, -maxF, maxF)
-    return generalized_forces
+    return np.clip(tau, -maxF, maxF)

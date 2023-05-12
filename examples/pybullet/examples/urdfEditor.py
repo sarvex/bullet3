@@ -34,27 +34,26 @@ parser = urdfEditor.UrdfEditor()
 parser.initializeFromBulletBody(mb, physicsClientId=org)
 parser.saveUrdf("test.urdf")
 
-if (1):
-  print("\ncreatingMultiBody...................n")
+print("\ncreatingMultiBody...................n")
 
-  obUid = parser.createMultiBody(physicsClientId=gui)
+obUid = parser.createMultiBody(physicsClientId=gui)
 
-  parser2 = urdfEditor.UrdfEditor()
-  print("\n###########################################\n")
+parser2 = urdfEditor.UrdfEditor()
+print("\n###########################################\n")
 
-  parser2.initializeFromBulletBody(obUid, physicsClientId=gui)
-  parser2.saveUrdf("test2.urdf")
+parser2.initializeFromBulletBody(obUid, physicsClientId=gui)
+parser2.saveUrdf("test2.urdf")
 
-  for i in range(p.getNumJoints(obUid, physicsClientId=gui)):
-    p.setJointMotorControl2(obUid,
-                            i,
-                            p.VELOCITY_CONTROL,
-                            targetVelocity=0,
-                            force=1,
-                            physicsClientId=gui)
-    print(p.getJointInfo(obUid, i, physicsClientId=gui))
+for i in range(p.getNumJoints(obUid, physicsClientId=gui)):
+  p.setJointMotorControl2(obUid,
+                          i,
+                          p.VELOCITY_CONTROL,
+                          targetVelocity=0,
+                          force=1,
+                          physicsClientId=gui)
+  print(p.getJointInfo(obUid, i, physicsClientId=gui))
 
-  parser = 0
+parser = 0
 
 p.setRealTimeSimulation(1, physicsClientId=gui)
 

@@ -33,12 +33,17 @@ for j in range(p.getNumJoints(humanoid)):
       p.resetJointStateMultiDof(humanoid, j, targetValue=[0,0,0,1], targetVelocity=[0,0,0])
       #p.changeDynamics(humanoid,j,angularDamping=0, linearDamping=0)
       spherical_index = j
-      p.setJointMotorControlMultiDof(humanoid, j, controlMode=p.POSITION_CONTROL, 
-          targetPosition=[0,0,0,1],  positionGain=0.2,
-          targetVelocity=[0,0,0], velocityGain=0,
-          force=[0,0,0])
-                                   
-    if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
+      p.setJointMotorControlMultiDof(
+          humanoid,
+          spherical_index,
+          controlMode=p.POSITION_CONTROL,
+          targetPosition=[0, 0, 0, 1],
+          positionGain=0.2,
+          targetVelocity=[0, 0, 0],
+          velocityGain=0,
+          force=[0, 0, 0],
+      )
+    if jointType in [p.JOINT_PRISMATIC, p.JOINT_REVOLUTE]:
       index+=1
       p.resetJointStateMultiDof(humanoid, j, targetValue=[0], targetVelocity=[0])
       p.setJointMotorControlMultiDof(humanoid, j, controlMode=p.POSITION_CONTROL, 

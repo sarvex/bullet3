@@ -38,9 +38,7 @@ class BulletSim():
 
   def __enter__(self):
     print("connecting")
-    optionstring = '--width={} --height={}'.format(pixelWidth, pixelHeight)
-    optionstring += ' --window_backend=2 --render_device=0'
-
+    optionstring = f'--width={pixelWidth} --height={pixelHeight} --window_backend=2 --render_device=0'
     print(self.connection_mode, optionstring, *self.argv)
     cid = pybullet.connect(self.connection_mode, options=optionstring, *self.argv)
     pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -92,13 +90,7 @@ def test(num_runs=300, shadow=1, log=True, plot=False):
                                       renderer=pybullet.ER_BULLET_HARDWARE_OPENGL)
     #renderer=pybullet.ER_TINY_RENDERER)
     stop = time.time()
-    duration = (stop - start)
-    if (duration):
-      fps = 1. / duration
-      #print("fps=",fps)
-    else:
-      fps = 0
-      #print("fps=",fps)
+    fps = 1. / duration if (duration := (stop - start)) else 0
     #print("duraction=",duration)
     #print("fps=",fps)
     times[i] = fps

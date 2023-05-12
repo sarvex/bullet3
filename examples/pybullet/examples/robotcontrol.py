@@ -17,13 +17,13 @@ maxForce = 100  #Newton
 
 for joint in range(2, 6):
   p.setJointMotorControl(husky, joint, p.VELOCITY_CONTROL, targetVel, maxForce)
-for step in range(300):
+for _ in range(300):
   p.stepSimulation()
 
 targetVel = -10
 for joint in range(2, 6):
   p.setJointMotorControl(husky, joint, p.VELOCITY_CONTROL, targetVel, maxForce)
-for step in range(400):
+for _ in range(400):
   p.stepSimulation()
 
 p.getContactPoints(husky)

@@ -50,15 +50,15 @@ while (controllerId < 0):
     if (e[BUTTONS][32] == p.VR_BUTTON_IS_DOWN):
       controllerId = e[CONTROLLER_ID]
 
-print("Using controllerId=" + str(controllerId))
+print(f"Using controllerId={str(controllerId)}")
 
 while True:
   events = p.getVREvents(allAnalogAxes=1)
 
-  for e in (events):
+  for e in events:
     if (e[CONTROLLER_ID] == controllerId):
       for a in range(10):
-        print("analog axis" + str(a) + "=" + str(e[8][a]))
+        print(f"analog axis{str(a)}={str(e[8][a])}")
     if (e[BUTTONS][33] & p.VR_BUTTON_WAS_TRIGGERED):
       prevPosition[e[CONTROLLER_ID]] = e[POSITION]
     if (e[BUTTONS][32] & p.VR_BUTTON_WAS_TRIGGERED):
@@ -81,7 +81,7 @@ while True:
       diff = [pt[0] - e[POSITION][0], pt[1] - e[POSITION][1], pt[2] - e[POSITION][2]]
       lenSqr = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]
       ptDistThreshold = 0.01
-      if (lenSqr > (ptDistThreshold * ptDistThreshold)):
+      if lenSqr > ptDistThreshold**2:
         p.addUserDebugLine(e[POSITION], prevPosition[e[CONTROLLER_ID]], colors[e[CONTROLLER_ID]],
                            widths[e[CONTROLLER_ID]])
         #p.loadURDF("cube_small.urdf",e[1])

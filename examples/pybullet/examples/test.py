@@ -2,7 +2,7 @@
 #but running from github repo instead
 import os, inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-print("current_dir=" + currentdir)
+print(f"current_dir={currentdir}")
 parentdir = os.path.join(currentdir, "../gym")
 os.sys.path.insert(0, parentdir)
 

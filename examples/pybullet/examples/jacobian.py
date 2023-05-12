@@ -33,9 +33,9 @@ def setJointPosition(robot, position, kp=1.0, kv=0.3):
                                 positionGains=[kp] * num_joints,
                                 velocityGains=[kv] * num_joints)
   else:
-    print("Not setting torque. "
-          "Expected torque vector of "
-          "length {}, got {}".format(num_joints, len(torque)))
+    print(
+        f"Not setting torque. Expected torque vector of length {num_joints}, got {len(torque)}"
+    )
 
 
 def multiplyJacobian(robot, jacobian, vector):

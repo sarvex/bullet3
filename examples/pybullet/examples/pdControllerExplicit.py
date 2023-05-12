@@ -44,10 +44,7 @@ class PDControllerExplicitMultiDof(object):
         axis = self._pb.getAxisDifferenceQuaternion(desiredPos, jointPos)
         jointVelNew = [jointVel[0], jointVel[1], jointVel[2], 0]
         qdot1 += jointVelNew
-        qError.append(axis[0])
-        qError.append(axis[1])
-        qError.append(axis[2])
-        qError.append(0)
+        qError.extend((axis[0], axis[1], axis[2], 0))
         desiredVel = [
             desiredVelocities[qdotIndex], desiredVelocities[qdotIndex + 1],
             desiredVelocities[qdotIndex + 2]

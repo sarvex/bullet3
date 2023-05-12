@@ -57,27 +57,24 @@ def convertSensor(x, fingerIndex):
     v = float(x)
   except ValueError:
     v = minV
-  if (v < minV):
-    v = minV
-  if (v > maxV):
-    v = maxV
-  b = (v - minV) / float(maxV - minV)
-  return (b)
+  v = max(v, minV)
+  v = min(v, maxV)
+  return (v - minV) / float(maxV - minV)
 
 
 ser = None
 portindex = 0
 while (ser is None and portindex < 30):
-  portname = 'COM' + str(portindex)
+  portname = f'COM{portindex}'
   print(portname)
   ser = getSerialOrNone(portname)
   if (ser is None):
-    portname = "/dev/cu.usbmodem14" + str(portindex)
+    portname = f"/dev/cu.usbmodem14{portindex}"
     print(portname)
     ser = getSerialOrNone(portname)
     if (ser is not None):
       print("COnnected!")
-  portindex = portindex + 1
+  portindex += 1
 
 if (ser is None):
   ser = serial.Serial(port="/dev/cu.usbmodem1421",

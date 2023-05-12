@@ -21,7 +21,7 @@ p.changeDynamics(r2d2,-1, linearDamping=0)
 p.setGravity(0,0,-10)
 
 for i in range (3*240):
-  txt = "frame "+str(i)
+  txt = f"frame {str(i)}"
   item = p.addUserDebugText(txt, [0,1,0])
   p.stepSimulation()
   #synchronize the visualizer (rendering frames for the video mp4) with stepSimulation

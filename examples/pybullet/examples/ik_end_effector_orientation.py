@@ -22,7 +22,7 @@ p.setGravity(0, 0, 0)
 
 while 1:
   p.stepSimulation()
-  for i in range(1):
+  for _ in range(1):
     pos = [0, 0, 1.26]
     orn = p.getQuaternionFromEuler([0, 0, 3.14])
 

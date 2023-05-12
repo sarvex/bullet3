@@ -44,10 +44,7 @@ for i in range(numRays):
 if (not useGui):
   timingLog = p.startStateLogging(p.STATE_LOGGING_PROFILE_TIMINGS, "rayCastBench.json")
 
-numSteps = 10
-if (useGui):
-  numSteps = 327680
-
+numSteps = 327680 if useGui else 10
 for i in range(numSteps):
   p.stepSimulation()
   for j in range(8):

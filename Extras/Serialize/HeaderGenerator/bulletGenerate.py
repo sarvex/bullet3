@@ -30,7 +30,7 @@ spaces = 4
 
 
 def addSpaces(file, space):
-  for i in range(0, space):
+  for _ in range(0, space):
     file.write(" ")
 
 
@@ -40,46 +40,45 @@ def write(file, spaces, string):
 
 
 ###################################################################################
-blender = open(out + "bullet.h", 'w')
-blender.write(header)
-blender.write("#ifndef __BULLET_H__\n")
-blender.write("#define __BULLET_H__\n")
-#for dt in dtList:
-#	blender.write("struct %s;\n"%dt.filename)
+with open(f"{out}bullet.h", 'w') as blender:
+  blender.write(header)
+  blender.write("#ifndef __BULLET_H__\n")
+  blender.write("#define __BULLET_H__\n")
+  #for dt in dtList:
+  #	blender.write("struct %s;\n"%dt.filename)
 
-###################################################################################
+  ###################################################################################
 
-blender.write("namespace Bullet {\n")
+  blender.write("namespace Bullet {\n")
 
-strUnRes = """
+  strUnRes = """
 // put an empty struct in the case
 typedef struct bInvalidHandle {
 	int unused;
 }bInvalidHandle;
 
 """
-blender.write(strUnRes)
+  blender.write(strUnRes)
 
-for dt in dtList:
-  write(blender, 4, "class %s;\n" % dt.name)
+  for dt in dtList:
+    write(blender, 4, "class %s;\n" % dt.name)
 
-for dt in dtList:
+  for dt in dtList:
 
-  strUpper = dt.filename.upper()
+    strUpper = dt.filename.upper()
 
-  blender.write("// -------------------------------------------------- //\n")
+    blender.write("// -------------------------------------------------- //\n")
 
-  write(blender, 4, "class %s\n" % dt.name)
+    write(blender, 4, "class %s\n" % dt.name)
 
-  write(blender, 4, "{\n")
-  write(blender, 4, "public:\n")
-  for i in dt.dataTypes:
-    write(blender, 8, i + ";\n")
+    write(blender, 4, "{\n")
+    write(blender, 4, "public:\n")
+    for i in dt.dataTypes:
+      write(blender, 8, i + ";\n")
 
-  write(blender, 4, "};\n")
+    write(blender, 4, "};\n")
 
-  blender.write("\n\n")
+    blender.write("\n\n")
 
-blender.write("}\n")
-blender.write("#endif//__BULLET_H__")
-blender.close()
+  blender.write("}\n")
+  blender.write("#endif//__BULLET_H__")
